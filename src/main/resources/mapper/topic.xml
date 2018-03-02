@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.deb8.repository.TopicRepository">
+	<insert id="create" parameterType="com.deb8.entity.Topic" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO topic (title, writer_id, reg_time, code)
+		VALUES (#{title}, #{writerId}, #{time}, #{code})
+	</insert>
+	
+	<select id="readById" parameterType="int" resultType="com.deb8.entity.Topic">
+		SELECT id, title, writer_id, reg_time as time, code FROM topic
+		WHERE id = #{id}
+	</select>
+	
+	<select id="readByCode" parameterType="String" resultType="com.deb8.entity.Topic">
+		SELECT id, title, writer_id, reg_time as time, code FROM topic
+		WHERE code = #{code}
+	</select>
+	
+	<select id="readTopicListByWriterId" parameterType="int" resultType="com.deb8.entity.Topic">
+		SELECT id, title, writer_id, reg_time as time, code FROM topic
+		WHERE writer_id = #{writerId}
+		ORDER BY id DESC;
+	</select>
+	
+	<select id="readRecentList" resultType="com.deb8.entity.Topic">
+		SELECT id, title, writer_id, reg_time as time, code FROM topic
+		ORDER BY id DESC LIMIT #{limit}
+	</select>
+	
+	<select id="readPopularTopicIds" resultType="int">
+		SELECT topic_id FROM post 
+		GROUP BY topic_id 
+		ORDER BY count(DISTINCT writer_id) DESC;
+	</select>
+	
+	<select id="readWriterId" parameterType="int" resultType="int">
+		SELECT IF (EXISTS (SELECT 1 from topic WHERE id = #{id}), 
+			 (SELECT writer_id from topic WHERE id = #{id}), -1)
+	</select>
+	
+	<update id="updateTitle" parameterType="com.deb8.entity.Topic">
+		UPDATE topic SET title = #{title} WHERE id = #{id}
+	</update>
+
+	<delete id="delete" parameterType="int">
+		DELETE FROM topic WHERE id = #{id}
+	</delete>
+	
+	<select id="hasId" parameterType="int" resultType="boolean">
+		SELECT EXISTS(SELECT 1 FROM topic WHERE id = #{id})
+	</select>
+	
+	<select id="hasCode" parameterType="String" resultType="boolean">
+		SELECT EXISTS(SELECT 1 FROM topic WHERE code = #{code})
+	</select>
+</mapper> 

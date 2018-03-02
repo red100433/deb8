@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.deb8.repository.UserRepository">
+	<insert id="create" parameterType="com.deb8.entity.User">
+		INSERT INTO user (email, passwd, bio, reg_time, code, name) 
+		VALUES (#{email}, #{passwd}, null, #{time}, #{code}, #{name})
+	</insert>
+	
+	<select id="readByCode" parameterType="String" resultType="com.deb8.entity.User">
+		SELECT id, email, name, bio, reg_time as time, code
+		FROM user WHERE code = #{code}
+	</select> 
+
+	<select id="readByEmail" parameterType="String" resultType="com.deb8.entity.User">
+		SELECT id, email, passwd, name, bio, reg_time as time, code
+		FROM user WHERE email = #{email}
+	</select>
+	
+	<update id="updateBio" parameterType="com.deb8.entity.User">
+		UPDATE user SET bio = #{bio} WHERE id = #{id}
+	</update>
+	
+	<update id="updatePasswd" parameterType="com.deb8.entity.User">
+		UPDATE user SET passwd = #{passwd} WHERE id = #{id}
+	</update>
+
+	<delete id="delete" parameterType="int">
+		DELETE FROM user WHERE id = #{id}
+	</delete>
+	
+	<select id="hasUser" resultType="boolean">
+		SELECT EXISTS(SELECT 1 FROM user WHERE email = #{email} AND passwd = #{passwd})
+	</select>
+	
+	<select id="hasId" parameterType="int" resultType="boolean">
+		SELECT EXISTS(SELECT 1 FROM user WHERE id = #{id})
+	</select>
+</mapper> 

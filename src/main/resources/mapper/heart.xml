@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.deb8.repository.HeartRepository">
+	<insert id="create" parameterType="com.deb8.entity.Heart" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO heart (giver_id, post_id, reg_time)
+		VALUES (#{giverId}, #{postId}, #{time})
+		ON DUPLICATE KEY UPDATE reg_time = #{time}
+	</insert>
+	
+	<select id="readHeartedPostIds" parameterType="int" resultType="Integer">
+		SELECT post_id FROM heart WHERE giver_id = #{giverId}
+	</select>
+	
+	<delete id="delete"  parameterType="com.deb8.entity.Heart">
+		DELETE FROM heart WHERE giver_id = #{giverId} AND post_id = #{postId}
+	</delete>
+</mapper> 

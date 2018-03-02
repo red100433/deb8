@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.deb8.repository.StatisticRepository">
+	<select id="readUserStat" parameterType="int" resultType="com.deb8.model.stat.UserStatistic">
+		SELECT COUNT(*) as postCnt, COUNT(DISTINCT topic_id) as topicCnt, SUM(hearts) as heartCnt 
+		FROM post WHERE writer_id = #{writerId}
+	</select>
+	
+	<select id="readTopicStat" parameterType="int" resultType="com.deb8.model.stat.TopicStatistic">
+		SELECT COUNT(*) as postCnt, COUNT(DISTINCT writer_id) as userCnt, SUM(hearts) as heartCnt 
+		FROM post WHERE topic_id = #{topicId}
+	</select>
+	
+	<select id="readAllTopicByUserId" parameterType="int" resultType="com.deb8.entity.Topic">
+		SELECT DISTINCT t.title, t.code, t.id, t.reg_time as time
+		FROM post p
+		INNER JOIN topic t ON p.topic_id = t.id
+		WHERE p.writer_id = #{userId}
+		ORDER BY p.reg_time DESC
+	</select>
+	
+	<select id="readAllUserByTopicId" parameterType="int" resultType="com.deb8.model.SimpleUser">
+		SELECT DISTINCT u.name, u.code, u.id
+		FROM user u 
+		INNER JOIN post p ON p.writer_id = u.id
+		WHERE p.topic_id = #{topicId}
+	</select>
+</mapper> 

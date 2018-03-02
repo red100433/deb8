@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.deb8.repository.PostRepository">
+	<resultMap id="PostResult" type="com.deb8.entity.Post">
+		<id property="id" column="id" javaType="int"/>
+		<result property="time" column="reg_time" javaType="long"/>
+		<result property="contents" column="contents" javaType="java.lang.String"/>
+		<result property="hearts" column="hearts" javaType="int"/>
+		<association property="writer" resultMap="UserDigestResult" javaType="com.deb8.model.SimpleUser"/>
+		<association property="topic" resultMap="TopicResult" javaType="com.deb8.entity.Topic"/>
+	</resultMap>
+	
+	<resultMap id="UserDigestResult" type="com.deb8.model.SimpleUser">
+		<result property="id" column="writer_id" javaType="int"/>
+		<result property="name" column="name" javaType="java.lang.String"/>
+		<result property="code" column="u_code" javaType="java.lang.String"/>
+	</resultMap>
+	<resultMap id="TopicResult" type="com.deb8.entity.Topic">
+		<result property="id" column="topic_id" javaType="int"/>
+		<result property="title" column="title" javaType="java.lang.String"/>
+		<result property="code" column="t_code" javaType="java.lang.String"/>
+		<result property="time" column="t_time" javaType="long"/>
+	</resultMap>
+	
+	<insert id="create" parameterType="com.deb8.model.SimplePost" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO post (reg_time, contents, writer_id, topic_id)
+		VALUES (#{time}, #{contents},
+				(SELECT id FROM user WHERE code = #{userCode}),
+				(SELECT id FROM topic WHERE code = #{topicCode}))
+	</insert>
+	
+	<select id="readById" parameterType="int" resultMap="PostResult">
+		SELECT 
+			p.id, p.reg_time, p.contents, p.hearts,  
+			u.name, u.code as u_code, p.writer_id,
+			t.title, t.code as t_code, t.reg_time as t_time, p.topic_id
+		FROM post p
+		INNER JOIN user u ON p.writer_id = u.id
+		INNER JOIN topic t ON p.topic_id = t.id
+		WHERE p.id = #{id}
+	</select>
+	
+	<select id="readRecentPost" parameterType="int" resultMap="PostResult">
+		SELECT 
+			p.id, p.reg_time, p.contents, p.hearts,  
+			u.name, u.code as u_code, p.writer_id,
+			t.title, t.code as t_code, t.reg_time as t_time, p.topic_id
+		FROM post p
+		INNER JOIN user u ON p.writer_id = u.id
+		INNER JOIN topic t ON p.topic_id = t.id
+		ORDER BY p.id DESC
+		LIMIT #{limit}
+	</select>
+	
+	<select id="readPopularPost" parameterType="int" resultMap="PostResult">
+		SELECT 
+			p.id, p.reg_time, p.contents, p.hearts,  
+			u.name, u.code as u_code, p.writer_id,
+			t.title, t.code as t_code, t.reg_time as t_time, p.topic_id
+		FROM post p
+		INNER JOIN user u ON p.writer_id = u.id
+		INNER JOIN topic t ON p.topic_id = t.id
+		ORDER BY p.hearts DESC
+		LIMIT #{limit}
+	</select>
+	
+	<select id="readSomeByTopic" parameterType="com.deb8.model.Paging" resultMap="PostResult">
+		SELECT 
+			p.id, p.reg_time, p.contents, p.hearts,  
+			u.name, u.code as u_code, p.writer_id,
+			t.title, t.code as t_code, t.reg_time as t_time, p.topic_id
+		FROM post p
+		INNER JOIN user u ON p.writer_id = u.id
+		INNER JOIN topic t ON p.topic_id = t.id
+		WHERE t.code = #{target} AND p.id &lt; #{lastId}
+		ORDER BY p.id DESC
+		LIMIT #{page}
+	</select>
+	
+	<select id="readSomeByUser" parameterType="com.deb8.model.Paging" resultMap="PostResult">
+		SELECT 
+			p.id, p.reg_time, p.contents, p.hearts,  
+			u.name, u.code as u_code, p.writer_id,
+			t.title, t.code as t_code, t.reg_time as t_time, p.topic_id
+		FROM post p
+		INNER JOIN user u ON p.writer_id = u.id
+		INNER JOIN topic t ON p.topic_id = t.id
+		WHERE u.code = #{target} AND p.id &lt; #{lastId}
+		ORDER BY p.id DESC
+		LIMIT #{page}
+	</select>
+	
+	<select id="readWriterId" parameterType="int" resultType="int">
+		SELECT IF (EXISTS (SELECT 1 from post WHERE id = #{id}), 
+			 (SELECT writer_id from post WHERE id = #{id}), -1)
+	</select>
+	
+	<update id="updateContents" parameterType="com.deb8.entity.Post">
+		UPDATE post SET contents = #{contents} WHERE id = #{id}
+	</update>
+	
+	<delete id="delete" parameterType="int">
+		DELETE FROM post WHERE id = #{id}
+	</delete>
+	
+	<select id="hasId" parameterType="int" resultType="boolean">
+		SELECT EXISTS(SELECT 1 FROM post WHERE id = #{id})
+	</select>
+</mapper> 

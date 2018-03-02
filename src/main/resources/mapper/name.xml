@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.deb8.repository.NameRepository">
+	<select id="isAssigned" parameterType="com.deb8.model.NameSet" resultType="boolean">
+		SELECT EXISTS (select 1  from user where name = 
+		CONCAT( (select name from adjective_pool where id = #{adjectiveId})," ",
+				(select name from animal_pool where id = #{animalId}) ))
+	</select>
+	
+	<select id="readOne" parameterType="com.deb8.model.NameSet" resultType="String">
+		SELECT CONCAT( (select name from adjective_pool where id = #{adjectiveId})," ",
+			(select name from animal_pool where id = #{animalId}) ) FROM dual
+	</select>
+</mapper> 
